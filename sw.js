@@ -1,4 +1,4 @@
-const CACHE='tokyo-business-2026-public-78059d78dd44';
+const CACHE='tokyo-business-2026-public-62cc524a5015';
 const FILES=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil((async()=>{
  const cache=await caches.open(CACHE);
