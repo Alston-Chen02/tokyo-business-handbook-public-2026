@@ -1,15 +1,55 @@
 name: Publish handbook to GitHub Pages
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: Publish website or sync official rate only
+        type: choice
+        options:
+          - publish
+          - rates
+        default: publish
+  schedule:
+    - cron: '7,22,37,52 * * * *'
 permissions:
   contents: read
   pages: write
   id-token: write
 concurrency:
-  group: pages
+  group: pages-${{ github.event_name }}-${{ inputs.mode }}
   cancel-in-progress: false
 jobs:
+  rate-sync:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Read official BOT quote
+        run: python3 scripts/fetch_rate.py /tmp/jpy.json
+      - name: Publish validated quote data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir /tmp/rate-feed
+          cd /tmp/rate-feed
+          git init
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git config http.https://github.com/.extraheader "AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          if git ls-remote --exit-code --heads origin rate-data; then
+            git fetch origin rate-data
+            git checkout -b rate-data FETCH_HEAD
+          else
+            git checkout --orphan rate-data
+          fi
+          cp /tmp/jpy.json jpy.json
+          git add jpy.json
+          git commit -m 'Refresh official BOT JPY spot selling quote'
+          git push origin HEAD:rate-data
   deploy:
+    if: github.event_name != 'schedule' && inputs.mode != 'rates'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
