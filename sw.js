@@ -1,8 +1,8 @@
-const CACHE='tokyo-business-2026-public-2c4e2c40b1e6';
+const CACHE='tokyo-business-2026-public-78059d78dd44';
 const FILES=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil((async()=>{
  const cache=await caches.open(CACHE);
- for(const file of FILES){const r=await fetch(file,{cache:'reload'});if(!r.ok||r.redirected)throw Error('Cannot cache authenticated app');await cache.put(file,r)}
+ for(const file of FILES){const r=await fetch(file,{cache:'reload'});if(!r.ok)throw Error('Cannot cache app');if(file==='./'||file==='./index.html'){if(!(await r.clone().text()).includes('東京出差電子手冊'))throw Error('Not authenticated app')}else if(file.endsWith('.png')){if(!r.headers.get('content-type')?.startsWith('image/'))throw Error('Not app icon')}else{const data=await r.clone().json();if(!data.start_url)throw Error('Not app manifest')}await cache.put(file,r)}
  await self.skipWaiting();
 })()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{
