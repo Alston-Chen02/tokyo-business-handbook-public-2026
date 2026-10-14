@@ -22,8 +22,10 @@ def parse(html):
  match=re.search(r'牌價最新掛牌時間[：:]?\s*(\d{4}/\d{2}/\d{2}\s+\d{2}:\d{2})',text)
  if not match:raise ValueError('Official quote timestamp missing; no data published')
  row=next((r for r in p.rows if r and '(JPY)' in r[0]),None)
- if not row or len(row)<6:raise ValueError('JPY row missing')
- rate=float(row[5])
+ if not row or len(row)<5:raise ValueError('JPY row missing')
+ # Currency cell contains both mobile and desktop labels; numeric cells are
+ # cash buying, cash selling, spot buying, then spot selling.
+ rate=float(row[4])
  if not 0<rate<5:raise ValueError('Invalid spot sell rate')
  return {'currency':'JPY','kind':'spotSell','rate':rate,'quotedAt':datetime.strptime(match[1],'%Y/%m/%d %H:%M').isoformat()+'+08:00','fetchedAt':datetime.now(timezone.utc).isoformat(),'source':SOURCE}
 if __name__=='__main__':
