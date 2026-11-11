@@ -1,8 +1,8 @@
 {
   "currency": "JPY",
   "kind": "spotSell",
-  "rate": 0.2088,
-  "quotedAt": "2026-11-11T14:01:00+08:00",
-  "fetchedAt": "2026-11-11T06:02:03.259570+00:00",
+  "rate": 0.2086,
+  "quotedAt": "2026-11-11T22:01:00+08:00",
+  "fetchedAt": "2026-11-11T14:09:13.136023+00:00",
   "source": "https://rate.bot.com.tw/xrt?Lang=zh-TW"
 }
